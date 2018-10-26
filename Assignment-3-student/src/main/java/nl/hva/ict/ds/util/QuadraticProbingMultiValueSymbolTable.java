@@ -2,26 +2,28 @@ package nl.hva.ict.ds.util;
 
 import nl.hva.ict.ds.Player;
 
+
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTable<String, Player> {
-    private int N;
+    private int N= 0;
     private Player[] players;
-    private String[] keys;
-    private List<Player> list;
-    private int size;
+    private String[] keys, collissions;
+
+    private int size; // initial size
+    private int collission;//keeps count of collissions
+
+
 
     /**
-     * @param arraySize
+     * @param arraySize initial size for Table <keys array, players array>.
      */
     public QuadraticProbingMultiValueSymbolTable(int arraySize) {
-        N=0;
         size = arraySize;
-        players = new Player[size^2];
-        keys = new String[size^2];
-
-        list = new ArrayList<>();
+        players = new Player[size];
+        keys = new String[size];
     }
 
     /**
@@ -30,39 +32,39 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
      */
     @Override
     public void put(String key, Player value) {
-        int hashedkey = hashing(key);
-        if (keys.length==0){
-            keys[N++] = key;
-            players[N++]= value;
-            list.set(N++, value);
+
+        int q = 0;
+        if (isEmpty()){
+
+            add(hash(key,q)%size,key,value);
         }else{
-            AddToFilledArray(hashedkey, key, value);
+
+
+            AddToFilledArray(hash(key,q)%size, key, value,q);
+
         }
+
     }
 
     /**
      * Checks keys array to see if it has key and add to quadratic equivelant of that key.
-     * @param hashedkey  hashed version of the key
+     *
      * @param key original key value in string
      * @param value player object
      */
-    private void AddToFilledArray(int hashedkey, String key, Player value){
-        for (int i = hashedkey; i <keys.length; i++) {
-            if (hasKey(i)){
-                N++;
-                //check if key is present use get method
-                String t = new  String(Integer.toString(i));
-                int k = hashing(t);
-                keys[k] = key;
-                players[k] = value;
-                list.set(k,value);
+    private void AddToFilledArray(int index, String key, Player value, int q){
+        int t;
 
-            }else{
-                keys[i] = key;
-                players[i] = value;
-                list.set(i,value);
-            }
+        if (index>=(size/2)) {resize(size*2);} //resizes table incase index is larger than half the size.
 
+
+        if (checkCollission(index, key)){
+            q++;
+
+            t = hash(key,q);
+            AddToFilledArray(t%size, key,value, q);
+        }else{
+            add(index,key,value);
 
         }
     }
@@ -72,33 +74,132 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
      */
     @Override
     public List<Player> get(String key) {
+
+
         List<Player> l = new ArrayList<>();
 
-        for (String k: keys){
-            if(k == key){
-                l.add(players[hashing(key)]);
+
+        for (int i = 0;  i<keys.length ; i++){
+            if (keys[i]!=null){
+                if (keys[i].equals(key)){
+                    l.add(players[i]);
+                }
             }
+
         }
 
         return l;
     }
 
-    private int hashing (String key){
-        return  (key.hashCode()+N*N%size);
+
+    /**
+     * Convert string value to a hash key value.
+     * @param k key to hash
+     * @return int index value from @param key.
+     */
+    private int hash(String k,int q){
+        int i=0;
+        if (q!=0){
+            i = (int) Math.pow(q,2);
+        }
+        return  Math.abs(((k.hashCode()& 0x7fffffff) +(i)));
+    }
+    /**
+     * Checks if Symbol table is empty.
+     * @return true if Symbol table is empty, false if not empty.
+     */
+    public boolean isEmpty(){
+            return size()==0;
     }
 
-    /** Note* try recursion
-     * @param key to check in keys array
-     * @return true if key is found in array
+    public int size(){
+        return N;
+    }
+
+
+    /**
+     * Adds values to the respective arrays.
+     * @param index is index value for each array.
+     * @param key is string to be added to keys array.
+     * @param value is object to be added to players array.
      */
-    private boolean hasKey(int key){
-        for (String ikey : keys){
-            if (ikey.equals(key)){
-                return true;
+    private void add (int index, String key, Player value){
+            if(keys[index]==null){
+
+                keys[index] = key;
+                players[index] = value;
+                N++;
+
+            }else {
+                //print("next for @keyIndex", index);
+                index = hash(key, 1);
+                add(index, key, value, 1);
+            }
+    }
+
+
+    /**
+     * Adds values to the respective arrays.
+     * @param index is index value for each array.
+     * @param key is string to be added to keys array.
+     * @param value is object to be added to players array.
+     * @param q is differentiato in quadratic formula.
+     */
+    private void add (int index, String key, Player value, int q){
+        if ( q>0){
+
+            if(keys[index]==null){
+
+                keys[index] = key;
+                players[index] = value;
+                N++;
+            }else {
+                index = hash(key, q++);
+                add(index, key, value, q);
             }
         }
-        return false;
     }
 
-    //method for detecting collissions
+
+    /**
+     * Checks if there's a value at the given index;
+     * @param index is key to check in keys array.
+     * @return true if index is not empty, else returns false.
+     */
+    private boolean checkCollission(int index, String key) {
+        if(keys[index]!=null){
+            collission++;
+            System.out.println("Collission for @oldkey: "+keys[index]+ " , @newkey: "+ key+ "@index: "+ index);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    /**
+     * Gets the amount of collisions detected.
+     * @return number of collissions detected.
+     */
+    public int getCollissionCount(){
+        return collission;
+    }
+
+    /**
+     * Resizes the arrays and symbol-table.
+     * @param size is the new size to be used;
+     */
+    private void resize(int size){
+        QuadraticProbingMultiValueSymbolTable q = new QuadraticProbingMultiValueSymbolTable(size);
+
+       for (int i = 0; i<keys.length; i++){
+            if(keys[i] !=null){
+                q.put(keys[i],players[i]);
+            }
+        }
+
+        this.keys=q.keys;
+        this.players = q.players;
+        this.size = q.size;
+    }
+
 }
