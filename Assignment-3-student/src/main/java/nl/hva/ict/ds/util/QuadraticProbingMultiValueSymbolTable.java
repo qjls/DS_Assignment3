@@ -126,7 +126,6 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
                 N++;
 
             }else {
-                //print("next for @keyIndex", index);
                 index = hash(key, 1);
                 add(index, key, value, 1);
             }
