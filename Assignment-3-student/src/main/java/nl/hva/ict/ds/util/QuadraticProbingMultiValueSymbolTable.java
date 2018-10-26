@@ -10,10 +10,10 @@ import java.util.List;
 public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTable<String, Player> {
     private int N= 0;
     private Player[] players;
-    private String[] keys, collissions;
+    private String[] keys;
 
-    private int size; // initial size
-    private int collission;//keeps count of collissions
+    private int size; // initial size, collission variable
+
 
 
 
@@ -24,6 +24,7 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
         size = arraySize;
         players = new Player[size];
         keys = new String[size];
+
     }
 
     /**
@@ -38,12 +39,8 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
 
             add(hash(key,q)%size,key,value);
         }else{
-
-
             AddToFilledArray(hash(key,q)%size, key, value,q);
-
         }
-
     }
 
     /**
@@ -57,7 +54,6 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
 
         if (index>=(size/2)) {resize(size*2);} //resizes table incase index is larger than half the size.
 
-
         if (checkCollission(index, key)){
             q++;
 
@@ -65,7 +61,6 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
             AddToFilledArray(t%size, key,value, q);
         }else{
             add(index,key,value);
-
         }
     }
     /**
@@ -74,10 +69,7 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
      */
     @Override
     public List<Player> get(String key) {
-
-
         List<Player> l = new ArrayList<>();
-
 
         for (int i = 0;  i<keys.length ; i++){
             if (keys[i]!=null){
@@ -85,7 +77,6 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
                     l.add(players[i]);
                 }
             }
-
         }
 
         return l;
@@ -112,6 +103,10 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
             return size()==0;
     }
 
+    /**
+     * Returns amount of entries added to the table.
+     * @return N in amount of entries added to the table.
+     */
     public int size(){
         return N;
     }
@@ -168,20 +163,12 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
      */
     private boolean checkCollission(int index, String key) {
         if(keys[index]!=null){
-            collission++;
+
             System.out.println("Collission for @oldkey: "+keys[index]+ " , @newkey: "+ key+ "@index: "+ index);
             return true;
         }else {
             return false;
         }
-    }
-
-    /**
-     * Gets the amount of collisions detected.
-     * @return number of collissions detected.
-     */
-    public int getCollissionCount(){
-        return collission;
     }
 
     /**
