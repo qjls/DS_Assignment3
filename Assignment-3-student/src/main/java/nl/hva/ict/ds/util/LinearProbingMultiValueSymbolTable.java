@@ -2,36 +2,59 @@ package nl.hva.ict.ds.util;
 
 import nl.hva.ict.ds.Player;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 public class LinearProbingMultiValueSymbolTable implements MultiValueSymbolTable<String, Player> {
 
-    private int N;
-    /**
-     * @param arraySize
-     */
-    public LinearProbingMultiValueSymbolTable(int arraySize) {
+    private int M;
+    private String[] keys;
+    private Player[] vals;
 
+    private int collisions;
+
+    public LinearProbingMultiValueSymbolTable(int arraySize) {
+        M = arraySize;
+        keys = new String[M];
+        vals = new Player[M];
+        collisions = 0;
+    }
+    // generates hash number
+    private int hash(String key) {
+        return (key.hashCode() & 0x7fffffff) % M;
     }
 
-    /**
-     * @param key   the key to use.
-     * @param value the value to be stored.
-     */
     @Override
     public void put(String key, Player value) {
-     // tries next index until finds an empty one
+        int i;
+
+        for (i = hash(key); keys[i] != null; i = (i + 1) % M) {
+            collisions++;
+            if (keys[i] == null) {
+                keys[i] = key;
+                vals[i] = value;
+                return;
+            }
+        }
+        keys[i] = key;
+        vals[i] = value;
     }
 
-    /**
-     * @param key the key for which the values must be returned.
-     * @return
-     */
     @Override
     public List<Player> get(String key) {
-        return null;
+        List<Player> playerList = new ArrayList<>();
+        System.out.println("Collissions count: "+getCollisions());
+
+        for (int i = 0; i < M; i++) {
+            if (key.equals(keys[i])) {
+                playerList.add(vals[i]);
+            }
+        }
+        return playerList;
     }
 
-    //method for detecting collissions
+    public int getCollisions() {
+        return collisions;
+    }
 }

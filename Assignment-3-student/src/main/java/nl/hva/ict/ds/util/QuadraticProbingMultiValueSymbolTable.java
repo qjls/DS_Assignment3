@@ -12,7 +12,8 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
     private Player[] players;
     private String[] keys;
 
-    private int size; // initial size, collission variable
+
+    private int size, collission; // initial size, collission variable
 
 
 
@@ -24,6 +25,7 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
         size = arraySize;
         players = new Player[size];
         keys = new String[size];
+        collission = 0;
 
     }
 
@@ -70,7 +72,7 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
     @Override
     public List<Player> get(String key) {
         List<Player> l = new ArrayList<>();
-
+        System.out.println("Collission count: "+ getCollission());
         for (int i = 0;  i<keys.length ; i++){
             if (keys[i]!=null){
                 if (keys[i].equals(key)){
@@ -162,7 +164,7 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
      */
     private boolean checkCollission(int index, String key) {
         if(keys[index]!=null){
-
+            collission+=1;
             System.out.println("Collission for @oldkey: "+keys[index]+ " , @newkey: "+ key+ "@index: "+ index);
             return true;
         }else {
@@ -186,6 +188,14 @@ public class QuadraticProbingMultiValueSymbolTable implements MultiValueSymbolTa
         this.keys=q.keys;
         this.players = q.players;
         this.size = q.size;
+        this.collission = q.collission;
+    }
+
+    /**
+     * @return number of collissions
+     */
+    private int getCollission(){
+        return collission;
     }
 
 }

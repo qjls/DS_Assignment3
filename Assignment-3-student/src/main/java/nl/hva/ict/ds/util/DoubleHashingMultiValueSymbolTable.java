@@ -6,31 +6,36 @@ import java.util.List;
 // Quin
 public class DoubleHashingMultiValueSymbolTable implements MultiValueSymbolTable<String, Player> {
 
+    private int M; // number of key value pairs in the symbol table
+    private String[] keys;
+    private Player[] vals;
+    private final int size; // size of linear probing table
+    private int collisions;
 
-    /**
-     * @param arraySize
-     */
-    public DoubleHashingMultiValueSymbolTable(int arraySize) {
-        //size must be larger
+    public DoubleHashingMultiValueSymbolTable(int arraySize){
+        size = arraySize;
+        keys = new String[arraySize];
+        vals = new Player[arraySize];
+        collisions= 0;
     }
 
-    /**
-     * @param key   the key to use.
-     * @param value the value to be stored.
-     */
     @Override
     public void put(String key, Player value) {
-
+        if (key == null) {
+            throw new IllegalArgumentException("first argument to put() is null");
+        }
+        if (value == null) {
+            delete(key);
+            return;
+        }
     }
 
-    /**
-     * @param key the key for which the values must be returned.
-     * @return
-     */
     @Override
     public List<Player> get(String key) {
         return null;
     }
 
-    //method for detecting collissions
+    private void delete(String key) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
 }
